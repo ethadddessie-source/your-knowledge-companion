@@ -11,7 +11,7 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { createRoom } from "@/lib/game.functions";
 import {
@@ -85,6 +85,9 @@ function QuestionsPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [autoStatus, setAutoStatus] = useState<string | null>(null);
+  const lastSavedRef = useRef(JSON.stringify({ ...empty }));
+  const targetRef = useRef<{ draft: boolean; id: string | null }>({ draft: true, id: null });
 
   useEffect(() => {
     if (!titleTouched && setInfo.data) setTitle(setInfo.data.title);
