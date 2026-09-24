@@ -269,9 +269,9 @@ function QuestionsPage() {
         </div>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[1480px] gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-7 lg:px-8 lg:py-8">
-        <aside className="min-w-0 lg:sticky lg:top-6 lg:self-start">
-          <div className="overflow-hidden rounded-2xl border border-studio-line bg-studio-surface">
+      <div className="mx-auto grid w-full max-w-[1480px] gap-3 px-4 py-3 sm:px-6 lg:h-[calc(100dvh-77px)] lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-5 lg:px-8 lg:py-3">
+        <aside className="min-w-0 lg:h-full lg:min-h-0">
+          <div className="overflow-hidden rounded-2xl border border-studio-line bg-studio-surface lg:flex lg:h-full lg:min-h-0 lg:flex-col">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-studio-line p-4">
               <div className="min-w-0">
                 <p className="font-studio-display text-base text-studio-ink">SORULAR</p>
@@ -288,7 +288,7 @@ function QuestionsPage() {
               </Button>
             </div>
 
-            <div className="flex max-h-56 gap-2 overflow-x-auto p-3 lg:max-h-[calc(100vh-260px)] lg:flex-col lg:overflow-y-auto">
+            <div className="flex max-h-56 gap-2 overflow-x-auto p-3 lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto">
               {list.isLoading && (
                 <p className="p-3 text-sm font-semibold text-studio-muted">Sorular yükleniyor...</p>
               )}
@@ -336,8 +336,8 @@ function QuestionsPage() {
           </div>
         </aside>
 
-        <section className="studio-enter min-w-0 rounded-2xl border border-studio-line bg-studio-surface">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-studio-line px-5 py-4 sm:px-7">
+        <section className="studio-enter min-w-0 rounded-2xl border border-studio-line bg-studio-surface lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:overflow-hidden">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-studio-line px-5 py-4 sm:px-7 lg:shrink-0 lg:py-3">
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase text-studio-blue">
                 {draftMode ? "Yeni Soru" : `Soru ${String((selectedIndex >= 0 ? selectedIndex : 0) + 1).padStart(2, "0")}`}
@@ -374,7 +374,7 @@ function QuestionsPage() {
             </div>
           </div>
 
-          <div className="p-5 sm:p-7 lg:p-9">
+          <div className="p-5 sm:p-7 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:p-5">
             {(error || notice) && (
               <div
                 role="status"
@@ -397,13 +397,13 @@ function QuestionsPage() {
                 id="question-text"
                 value={form.question}
                 onChange={(event) => set("question", event.target.value)}
-                rows={4}
+                rows={3}
                 placeholder="Sorunuzu buraya yazın..."
-                className="w-full resize-none rounded-xl border border-studio-line bg-studio-elevated/60 p-5 text-lg font-semibold text-studio-ink outline-hidden placeholder:text-studio-muted/60 focus:border-studio-yellow focus:ring-2 focus:ring-studio-yellow/20 sm:text-xl"
+                className="h-24 w-full resize-none rounded-xl border border-studio-line bg-studio-elevated/60 p-4 text-lg font-semibold text-studio-ink outline-hidden placeholder:text-studio-muted/60 focus:border-studio-yellow focus:ring-2 focus:ring-studio-yellow/20 sm:text-xl lg:h-16 lg:py-3"
               />
             </div>
 
-            <div className="mt-7 flex items-center justify-between gap-3">
+            <div className="mt-5 flex items-center justify-between gap-3 lg:mt-4">
               <div>
                 <h2 className="font-studio-display text-base text-studio-ink">CEVAP SEÇENEKLERİ</h2>
                 <p className="mt-1 text-xs text-studio-muted">Doğru yanıtı sağdaki işaretten seç.</p>
@@ -413,7 +413,7 @@ function QuestionsPage() {
               </span>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:mt-3 lg:gap-2">
               {LETTERS.map((letter, index) => {
                 const key = `option_${letter.toLowerCase()}` as "option_a";
                 const value = form[key];
@@ -422,13 +422,13 @@ function QuestionsPage() {
                 return (
                   <div
                     key={letter}
-                    className={`grid min-h-20 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border p-3 transition-colors ${
+                    className={`grid min-h-20 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border p-3 transition-colors lg:min-h-14 lg:p-2 ${
                       correct
                         ? "border-studio-yellow bg-studio-yellow/10"
                         : "border-studio-line bg-studio-elevated/60 focus-within:border-studio-yellow"
                     }`}
                   >
-                    <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg font-studio-display text-sm ${correct ? "bg-studio-yellow text-studio-bg" : "bg-studio-bg text-studio-ink"}`}>
+                     <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg font-studio-display text-sm lg:h-10 lg:w-10 ${correct ? "bg-studio-yellow text-studio-bg" : "bg-studio-bg text-studio-ink"}`}>
                       {letter}
                     </span>
                     <input
@@ -461,7 +461,7 @@ function QuestionsPage() {
               })}
             </div>
 
-            <div className="mt-7 grid gap-3 border-t border-studio-line pt-6 sm:grid-cols-[auto_1fr] sm:items-center">
+            <div className="mt-5 grid gap-3 border-t border-studio-line pt-4 sm:grid-cols-[auto_1fr] sm:items-center lg:mt-4 lg:pt-3">
               <div className="flex gap-2 sm:hidden">
                 {!draftMode && selectedId && (
                   <>
