@@ -15,6 +15,13 @@
       "when": 1790233623059,
       "tag": "0001_add_question_sets",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790245958208,
+      "tag": "0002_noop_sync",
+      "breakpoints": true
     }
   ]
 }
