@@ -11,7 +11,7 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { createRoom } from "@/lib/game.functions";
 import {
@@ -85,6 +85,9 @@ function QuestionsPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [autoStatus, setAutoStatus] = useState<string | null>(null);
+  const lastSavedRef = useRef(JSON.stringify({ ...empty }));
+  const targetRef = useRef<{ draft: boolean; id: string | null }>({ draft: true, id: null });
 
   useEffect(() => {
     if (!titleTouched && setInfo.data) setTitle(setInfo.data.title);
@@ -100,20 +103,27 @@ function QuestionsPage() {
   }, [list.data, selectedId]);
 
   useEffect(() => {
+    targetRef.current = { draft: draftMode, id: selectedId };
+  }, [draftMode, selectedId]);
+
+  useEffect(() => {
     if (draftMode) {
       setForm({ ...empty });
+      lastSavedRef.current = JSON.stringify({ ...empty });
       return;
     }
     const question = list.data?.find((item) => item.id === selectedId);
     if (question) {
-      setForm({
+      const loaded = {
         question: question.question,
         option_a: question.option_a,
         option_b: question.option_b,
         option_c: question.option_c,
         option_d: question.option_d,
         correct_answer: question.correct_answer.toUpperCase(),
-      });
+      };
+      setForm(loaded);
+      lastSavedRef.current = JSON.stringify(loaded);
     }
   }, [draftMode, selectedId, list.data]);
 
@@ -137,20 +147,61 @@ function QuestionsPage() {
     setSelectedId(null);
     setDraftMode(true);
     setForm({ ...empty });
+    lastSavedRef.current = JSON.stringify({ ...empty });
+    setAutoStatus(null);
   };
+
+  const persist = async (snapshot: typeof empty, silent: boolean) => {
+    const question = snapshot.question.trim();
+    const a = snapshot.option_a.trim();
+    const b = snapshot.option_b.trim();
+    const c = snapshot.option_c.trim();
+    const d = snapshot.option_d.trim();
+    if (!question || !a || !b) {
+      if (!silent) setError(!question ? "Soru metni gerekli" : "İlk iki cevap (A ve B) zorunlu");
+      else setAutoStatus("Taslak — henüz kaydedilmedi");
+      return false;
+    }
+    const filled: Record<string, string> = { A: a, B: b, C: c, D: d };
+    if (!filled[snapshot.correct_answer]) {
+      if (!silent) setError("Doğru cevap olarak dolu bir seçenek seçin");
+      return false;
+    }
+    if (silent) setAutoStatus("Kaydediliyor...");
+    try {
+      const target = targetRef.current;
+      if (target.draft || !target.id) {
+        const result = await add({ data: { ...snapshot, setId } });
+        setSelectedId(result.id);
+        setDraftMode(false);
+        targetRef.current = { draft: false, id: result.id };
+      } else {
+        await edit({ data: { ...snapshot, id: target.id } });
+      }
+      lastSavedRef.current = JSON.stringify(snapshot);
+      if (silent) setAutoStatus("Kaydedildi");
+      await list.refetch();
+      return true;
+    } catch (caught) {
+      if (!silent) setError(caught instanceof Error ? caught.message : "Kaydedilemedi");
+      else setAutoStatus("Kaydedilemedi");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const snapshot = JSON.stringify(form);
+    if (snapshot === lastSavedRef.current) return;
+    const timer = window.setTimeout(() => {
+      void persist(form, true);
+    }, 900);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
 
   const save = async () => {
     setError(null);
     setNotice(null);
-    const question = form.question.trim();
-    const a = form.option_a.trim();
-    const b = form.option_b.trim();
-    const c = form.option_c.trim();
-    const d = form.option_d.trim();
-    if (!question) return setError("Soru metni gerekli");
-    if (!a || !b) return setError("İlk iki cevap (A ve B) zorunlu");
-    const filled: Record<string, string> = { A: a, B: b, C: c, D: d };
-    if (!filled[form.correct_answer]) return setError("Doğru cevap olarak dolu bir seçenek seçin");
     if (titleTouched && !title.trim()) return setError("Set başlığı gerekli");
 
     setSaving(true);
@@ -160,16 +211,10 @@ function QuestionsPage() {
         setTitleTouched(false);
         void setInfo.refetch();
       }
-      if (draftMode || !selectedId) {
-        const result = await add({ data: { ...form, setId } });
-        setSelectedId(result.id);
-        setDraftMode(false);
-      } else {
-        await edit({ data: { ...form, id: selectedId } });
-      }
-      setNotice("Değişiklikler kaydedildi");
+      const saved = await persist(form, false);
+      if (!saved) return;
+      setNotice("Tüm değişiklikler kaydedildi");
       window.setTimeout(() => setNotice(null), 2000);
-      await list.refetch();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Kaydedilemedi");
     } finally {
@@ -341,6 +386,9 @@ function QuestionsPage() {
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase text-studio-blue">
                 {draftMode ? "Yeni Soru" : `Soru ${String((selectedIndex >= 0 ? selectedIndex : 0) + 1).padStart(2, "0")}`}
+                {autoStatus && (
+                  <span className="ml-2 normal-case text-studio-muted">· {autoStatus}</span>
+                )}
               </p>
               <h1 className="mt-1 truncate font-studio-display text-xl text-studio-ink sm:text-2xl">
                 {draftMode ? "SORUNU TASARLA" : "SORUYU DÜZENLE"}
