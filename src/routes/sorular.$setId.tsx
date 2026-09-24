@@ -271,7 +271,7 @@ function QuestionsPage() {
 
       <div className="mx-auto grid w-full max-w-[1480px] gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-7 lg:px-8 lg:py-8">
         <aside className="min-w-0 lg:sticky lg:top-6 lg:self-start">
-          <div className="border border-studio-line bg-studio-surface">
+          <div className="overflow-hidden rounded-2xl border border-studio-line bg-studio-surface">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-studio-line p-4">
               <div className="min-w-0">
                 <p className="font-studio-display text-base text-studio-ink">SORULAR</p>
@@ -293,7 +293,7 @@ function QuestionsPage() {
                 <p className="p-3 text-sm font-semibold text-studio-muted">Sorular yükleniyor...</p>
               )}
               {!list.isLoading && total === 0 && (
-                <div className="min-w-64 border border-dashed border-studio-line bg-studio-bg p-4 lg:min-w-0">
+                <div className="min-w-64 rounded-xl border border-dashed border-studio-line bg-studio-bg p-4 lg:min-w-0">
                   <FileQuestion className="mb-3 h-6 w-6 text-studio-yellow" />
                   <p className="text-sm font-semibold text-studio-ink">İlk sorunu hazırlamaya başla.</p>
                 </div>
@@ -305,13 +305,13 @@ function QuestionsPage() {
                     key={question.id}
                     variant="ghost"
                     onClick={() => pickQuestion(question.id)}
-                    className={`h-auto min-w-56 justify-start rounded-none border p-3 text-left lg:min-w-0 ${
+                    className={`h-auto min-w-56 justify-start rounded-xl border p-3 text-left lg:min-w-0 ${
                       active
                         ? "border-studio-yellow bg-studio-yellow/10 text-studio-ink"
                         : "border-transparent bg-studio-bg/50 text-studio-muted hover:border-studio-line hover:bg-studio-elevated hover:text-studio-ink"
                     }`}
                   >
-                    <span className={`grid h-8 w-8 shrink-0 place-items-center text-xs font-bold ${active ? "bg-studio-yellow text-studio-bg" : "bg-studio-elevated text-studio-muted"}`}>
+                    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-bold ${active ? "bg-studio-yellow text-studio-bg" : "bg-studio-elevated text-studio-muted"}`}>
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span className="min-w-0 flex-1">
@@ -336,7 +336,7 @@ function QuestionsPage() {
           </div>
         </aside>
 
-        <section className="studio-enter min-w-0 border border-studio-line bg-studio-surface">
+        <section className="studio-enter min-w-0 rounded-2xl border border-studio-line bg-studio-surface">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-studio-line px-5 py-4 sm:px-7">
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase text-studio-blue">
@@ -378,7 +378,7 @@ function QuestionsPage() {
             {(error || notice) && (
               <div
                 role="status"
-                className={`mb-6 flex items-center gap-3 border px-4 py-3 text-sm font-semibold ${
+                className={`mb-6 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold ${
                   error
                     ? "border-studio-danger/60 bg-studio-danger/10 text-studio-danger"
                     : "border-studio-success/60 bg-studio-success/10 text-studio-success"
@@ -399,7 +399,7 @@ function QuestionsPage() {
                 onChange={(event) => set("question", event.target.value)}
                 rows={4}
                 placeholder="Sorunuzu buraya yazın..."
-                className="w-full resize-none border border-studio-line bg-studio-bg p-5 text-lg font-semibold text-studio-ink outline-hidden placeholder:text-studio-muted/60 focus:border-studio-blue focus:ring-2 focus:ring-studio-blue/20 sm:text-xl"
+                className="w-full resize-none rounded-xl border border-studio-line bg-studio-elevated/60 p-5 text-lg font-semibold text-studio-ink outline-hidden placeholder:text-studio-muted/60 focus:border-studio-yellow focus:ring-2 focus:ring-studio-yellow/20 sm:text-xl"
               />
             </div>
 
@@ -408,7 +408,7 @@ function QuestionsPage() {
                 <h2 className="font-studio-display text-base text-studio-ink">CEVAP SEÇENEKLERİ</h2>
                 <p className="mt-1 text-xs text-studio-muted">Doğru yanıtı sağdaki işaretten seç.</p>
               </div>
-              <span className="shrink-0 border border-studio-line bg-studio-bg px-3 py-1.5 text-xs font-bold text-studio-muted">
+              <span className="shrink-0 rounded-full border border-studio-line bg-studio-bg px-3 py-1.5 text-xs font-bold text-studio-muted">
                 A–B zorunlu
               </span>
             </div>
@@ -422,13 +422,13 @@ function QuestionsPage() {
                 return (
                   <div
                     key={letter}
-                    className={`grid min-h-20 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border p-3 transition-colors ${
+                    className={`grid min-h-20 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border p-3 transition-colors ${
                       correct
                         ? "border-studio-yellow bg-studio-yellow/10"
-                        : "border-studio-line bg-studio-bg focus-within:border-studio-blue"
+                        : "border-studio-line bg-studio-elevated/60 focus-within:border-studio-yellow"
                     }`}
                   >
-                    <span className={`grid h-11 w-11 shrink-0 place-items-center font-studio-display text-sm ${correct ? "bg-studio-yellow text-studio-bg" : "bg-studio-elevated text-studio-ink"}`}>
+                    <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg font-studio-display text-sm ${correct ? "bg-studio-yellow text-studio-bg" : "bg-studio-bg text-studio-ink"}`}>
                       {letter}
                     </span>
                     <input
