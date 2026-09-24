@@ -202,15 +202,6 @@ function QuestionsPage() {
   const save = async () => {
     setError(null);
     setNotice(null);
-    const question = form.question.trim();
-    const a = form.option_a.trim();
-    const b = form.option_b.trim();
-    const c = form.option_c.trim();
-    const d = form.option_d.trim();
-    if (!question) return setError("Soru metni gerekli");
-    if (!a || !b) return setError("İlk iki cevap (A ve B) zorunlu");
-    const filled: Record<string, string> = { A: a, B: b, C: c, D: d };
-    if (!filled[form.correct_answer]) return setError("Doğru cevap olarak dolu bir seçenek seçin");
     if (titleTouched && !title.trim()) return setError("Set başlığı gerekli");
 
     setSaving(true);
@@ -220,16 +211,10 @@ function QuestionsPage() {
         setTitleTouched(false);
         void setInfo.refetch();
       }
-      if (draftMode || !selectedId) {
-        const result = await add({ data: { ...form, setId } });
-        setSelectedId(result.id);
-        setDraftMode(false);
-      } else {
-        await edit({ data: { ...form, id: selectedId } });
-      }
-      setNotice("Değişiklikler kaydedildi");
+      const saved = await persist(form, false);
+      if (!saved) return;
+      setNotice("Tüm değişiklikler kaydedildi");
       window.setTimeout(() => setNotice(null), 2000);
-      await list.refetch();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Kaydedilemedi");
     } finally {
@@ -401,6 +386,9 @@ function QuestionsPage() {
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase text-studio-blue">
                 {draftMode ? "Yeni Soru" : `Soru ${String((selectedIndex >= 0 ? selectedIndex : 0) + 1).padStart(2, "0")}`}
+                {autoStatus && (
+                  <span className="ml-2 normal-case text-studio-muted">· {autoStatus}</span>
+                )}
               </p>
               <h1 className="mt-1 truncate font-studio-display text-xl text-studio-ink sm:text-2xl">
                 {draftMode ? "SORUNU TASARLA" : "SORUYU DÜZENLE"}
