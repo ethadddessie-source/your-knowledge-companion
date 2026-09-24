@@ -103,20 +103,27 @@ function QuestionsPage() {
   }, [list.data, selectedId]);
 
   useEffect(() => {
+    targetRef.current = { draft: draftMode, id: selectedId };
+  }, [draftMode, selectedId]);
+
+  useEffect(() => {
     if (draftMode) {
       setForm({ ...empty });
+      lastSavedRef.current = JSON.stringify({ ...empty });
       return;
     }
     const question = list.data?.find((item) => item.id === selectedId);
     if (question) {
-      setForm({
+      const loaded = {
         question: question.question,
         option_a: question.option_a,
         option_b: question.option_b,
         option_c: question.option_c,
         option_d: question.option_d,
         correct_answer: question.correct_answer.toUpperCase(),
-      });
+      };
+      setForm(loaded);
+      lastSavedRef.current = JSON.stringify(loaded);
     }
   }, [draftMode, selectedId, list.data]);
 
@@ -140,7 +147,57 @@ function QuestionsPage() {
     setSelectedId(null);
     setDraftMode(true);
     setForm({ ...empty });
+    lastSavedRef.current = JSON.stringify({ ...empty });
+    setAutoStatus(null);
   };
+
+  const persist = async (snapshot: typeof empty, silent: boolean) => {
+    const question = snapshot.question.trim();
+    const a = snapshot.option_a.trim();
+    const b = snapshot.option_b.trim();
+    const c = snapshot.option_c.trim();
+    const d = snapshot.option_d.trim();
+    if (!question || !a || !b) {
+      if (!silent) setError(!question ? "Soru metni gerekli" : "İlk iki cevap (A ve B) zorunlu");
+      else setAutoStatus("Taslak — henüz kaydedilmedi");
+      return false;
+    }
+    const filled: Record<string, string> = { A: a, B: b, C: c, D: d };
+    if (!filled[snapshot.correct_answer]) {
+      if (!silent) setError("Doğru cevap olarak dolu bir seçenek seçin");
+      return false;
+    }
+    if (silent) setAutoStatus("Kaydediliyor...");
+    try {
+      const target = targetRef.current;
+      if (target.draft || !target.id) {
+        const result = await add({ data: { ...snapshot, setId } });
+        setSelectedId(result.id);
+        setDraftMode(false);
+        targetRef.current = { draft: false, id: result.id };
+      } else {
+        await edit({ data: { ...snapshot, id: target.id } });
+      }
+      lastSavedRef.current = JSON.stringify(snapshot);
+      if (silent) setAutoStatus("Kaydedildi");
+      await list.refetch();
+      return true;
+    } catch (caught) {
+      if (!silent) setError(caught instanceof Error ? caught.message : "Kaydedilemedi");
+      else setAutoStatus("Kaydedilemedi");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const snapshot = JSON.stringify(form);
+    if (snapshot === lastSavedRef.current) return;
+    const timer = window.setTimeout(() => {
+      void persist(form, true);
+    }, 900);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
 
   const save = async () => {
     setError(null);
